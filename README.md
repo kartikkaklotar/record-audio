@@ -1,5 +1,5 @@
 # record-audio
-Record a audio file and upload it to s3
+Record a audio and upload it to `AWS S3` bucket using `flask`. File will be uploaded to S3 bucket inside `input` folder.
 
 ## Getting started
 ### Clone repository
