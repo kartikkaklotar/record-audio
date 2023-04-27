@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Upload File to S3</title>
+</head>
+
+<body>
+    <h1>Audio Recording Test and Upload to S3 bucket</h1>
+    <p>Click on <b>Record</b> button to start the recording, and <b>Stop & Submit</b> button to stop.</p>
+    <button id="record-btn">Record</button>
+    <button id="stop-btn">Stop & Submit</button>
+
+    <script>
+        let mediaRecorder;
+        let chunks = [];
+
+        const recordButton = document.getElementById('record-btn');
+        const stopButton = document.getElementById('stop-btn');
+
+        recordButton.addEventListener('click', () => {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then((stream) => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+
+                    mediaRecorder.addEventListener('dataavailable', (event) => {
+                        chunks.push(event.data);
+                    });
+
+                    mediaRecorder.addEventListener("stop", () => {
+                        // store the blob in var
+                        const blob = new Blob(chunks, { type: 'audio/wav' });
+
+                        // do something with the recorded audio data, like store in a variable
+                        const audioData = new FormData();
+                        audioData.append('audio', blob);
+                        // call the api to store audio to s3
+                        fetch('/upload', {
+                            method: 'POST',
+                            body: audioData
+                        }).then(response => {
+                            console.log(response);
+                        }).catch(error => {
+                            console.error(error);
+                        });
+                    });
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        });
+        stopButton.addEventListener('click', () => {
+            mediaRecorder.stop();
+        });
+    </script>
+</body>
+
+</html>
